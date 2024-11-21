@@ -1,0 +1,135 @@
+
+Method 01 
+
+1 - Create a new folder  « myproject »
+2 - Cd myproject   
+	pip instal virtualenv
+	virtualenv env
+myproject > env\Scripts/activate
+(env) myproject> pip install django
+(env) myproject> django-admin startproject project1 
+cd project1
+		python manage.py migrate
+		python manage.py startapp app1 (python manage.py startapp app1)
+		python manage.py runserver
+
+vscode :
+	project1> settings> INSTALLED_APPS = [
+				...
+				...
+				#+
+				'app1.apps.BAseConfig',
+
+
+	app1>models.py
+		from django.db import models
+		+ from django.contrib.auth.models import User
+
+		class Post(models.Model):
+			title  = models.CharField(max_length=255)
+			author = models.ForeignKey(User, on_delete=models.CASCADE)
+			body   = models.TextField()
+
+			def __str__(self):
+				return self.title + ' | ' + str(self.author)
+
+
+	app1>views.py
+			
+		# Create your views here.
+		from django.views.generic import ListView, DetailView
+		from . models import Post
+
+		class HomeView(ListView):                               # def home(request):
+			model = Post                                        #     return render(request, "home.html")
+			template_name = 'home.html'                       
+
+		class ArticleDetailView(DetailView):
+			model = Post
+			template_name = 'article_details.html'
+
+	app1> create urls.py 
+
+		from django.urls import path
+		from . views import HomeView,ArticleDetailView            # from . import views
+		urlpatterns = [
+			path('', HomeView.as_view(), name='home'),             # path('', views.home, name='Home'),
+			path('article/<int:pk>', ArticleDetailView.as_view(), name='article_details'),
+		]
+
+	project1>urls.py
+
+		from django.contrib import admin
+		from django.urls import path, include
+
+		urlpatterns = [
+			path('admin/', admin.site.urls),
+			path('', include('theblog.urls')),
+		]
+
+	app1>create folder templates\base
+					home.html
+					posts.html
+					main.html 
+	project1> create folder static
+					css
+					images
+					js
+	
+	project1> settings> 
+			STATIC_URL = 'static/'
+			MEDIA_URL = '/images/'
+
+			STATICFILES_DIRS = [
+    				os.path.join(BASE_DIR, 'static')
+			]
+
+			STATIC_ROOT = os.path.join( BASE_DIR, 'staticfiles')
+			MEDIA_ROOT  = os.path.join( BASE_DIR, 'static/images')
+			
+		tap this code --> python manage.py collectstatic
+	
+	project1> urls.py	
+		# + 
+		from django.conf.urls.static import static
+		from django.conf import settings
+
+		urlpatterns = [
+    			 path('admin/', admin.site.urls),
+   			 path('', include('portfolio_app.urls')),
+
+			]
+
+		# +
+		urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)	
+		urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+		
+
+		and tap --> pip install whitenoise	
+
+	project1> settings> 
+		MIDDLEWARE = [
+
+    			'whitenoise.middleware.WhiteNoiseMiddleware',
+
+  			 'django.middleware.security.SecurityMiddleware',
+			...
+			...
+			]
+
+	app > admin
+            		from . models import Skills
+
+			admin.site.register(Skills)
+
+//-------------------------
+pip freez > requirements.txt
+cat requirements.txt
+//--------------------------
+
+//----------------------
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / "templates"],
+//-----------------------
